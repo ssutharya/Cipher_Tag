@@ -1,0 +1,35 @@
+.patient-list-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.patient-list-container h2 {
+    font-size: 24px;
+    color: #333;
+}
+
+.patient-list-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.patient-list-container li {
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.patient-list-container li:hover {
+    transform: translateY(-5px);
+}
+
+.patient-list-container strong {
+    color: #555;
+}
