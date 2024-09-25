@@ -6,8 +6,10 @@ from .models import Doctor, Patient, Appointment
 from .serializers import DoctorSerializer, PatientSerializer, AppointmentSerializer
 from django.contrib.auth.models import User
 
-# List all available doctors
+from rest_framework.permissions import AllowAny
+
 @api_view(['GET'])
+@permission_classes([AllowAny])  # This allows access without authentication
 def list_available_doctors(request):
     doctors = Doctor.objects.filter(available=True)
     serializer = DoctorSerializer(doctors, many=True)
@@ -84,3 +86,27 @@ def list_appointments(request):
     appointments = Appointment.objects.all()
     serializer = AppointmentSerializer(appointments, many=True)
     return Response(serializer.data)
+
+
+# Doctor login API
+@api_view(['POST'])
+def doctor_login(request):
+    data = request.data
+    username = data.get('username')
+    password = data.get('password')
+
+    # Authenticate the doctor
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        try:
+            doctor = Doctor.objects.get(user=user)
+            serializer = DoctorSerializer(doctor)
+            return Response({
+                "message": "Login successful",
+                "doctor": serializer.data
+            }, status=status.HTTP_200_OK)
+        except Doctor.DoesNotExist:
+            return Response({"error": "User is not a doctor"}, status=status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
