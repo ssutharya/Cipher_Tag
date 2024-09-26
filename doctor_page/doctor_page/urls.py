@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
+
+# Create a simple view for the root URL (if needed)
+def home_view(request):
+    return HttpResponse("Welcome to the home page!")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  # Include the API app URLs
+    path('api/', include('api.urls')),  # Assuming 'api' is your app
+    path('', home_view, name='home'),   # Add this to handle the root URL
 ]
