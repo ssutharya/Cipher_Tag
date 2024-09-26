@@ -4,14 +4,19 @@ from .models import Doctor, Patient, Appointment
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
-        fields = ['user', 'specialty', 'appointment_fee', 'available']
+        fields = '__all__'
+
 
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
-        fields = ['user', 'name', 'age', 'sex', 'height', 'weight', 'medical_history', 'registered_by_hospital', 'doctor']
+        fields = '__all__'
+
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    doctor = DoctorSerializer()
+    patient = PatientSerializer()
+
     class Meta:
         model = Appointment
-        fields = ['doctor', 'patient', 'appointment_date', 'fee_paid']
+        fields = '__all__'

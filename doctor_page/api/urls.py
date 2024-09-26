@@ -1,11 +1,15 @@
 from django.urls import path
-from .views import list_available_doctors, register_patient, book_appointment, list_patients, list_appointments, doctor_login
+from . import views
 
 urlpatterns = [
-    path('available-doctors/', list_available_doctors, name='available_doctors'),
-    path('register-patient/', register_patient, name='register_patient'),
-    path('book-appointment/', book_appointment, name='book_appointment'),
-    path('list-patients/', list_patients, name='list_patients'),
-    path('list-appointments/', list_appointments, name='list_appointments'),
-    path('doctor-login/', doctor_login, name='doctor_login'),
+    path('doctors/', views.list_available_doctors),
+    path('patients/register/', views.register_patient),
+    path('patients/login/', views.login_patient),
+    path('doctors/login/', views.login_doctor),
+    path('admin/login/', views.login_user),
+    path('appointments/book/', views.book_appointment),
+    path('patients/', views.list_patients),
+    path('appointments/', views.list_appointments),
+    path('doctor/patients/', views.list_doctor_patients),
+    path('doctors/create/', views.create_doctor),
 ]
