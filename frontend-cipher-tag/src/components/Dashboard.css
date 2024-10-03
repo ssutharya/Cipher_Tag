@@ -1,107 +1,96 @@
 /* General */
 body {
     font-family: 'Arial', sans-serif;
-    margin-left: 250px;
-    padding: 10px;
-    background-color: #f9f9f9;
+    background-color: #f0f2f5; 
 }
 
-.container {
-    display: flex;
-}
-
-/* Sidebar Styles */
+/* Sidebar */
 .sidebar {
-    width: 200px; /* Set fixed width for sidebar */
-    background-color: #333; /* Dark background for sidebar */
+    width: 200px;
+    background-color: #333;
     position: fixed;
     top: 0;
     left: 0;
     height: 100%;
     padding: 20px;
     display: flex;
-    flex-direction: column; /* Stack items vertically */
+    flex-direction: column;
+}
+
+/* Alignments */
+.patients-title {
+    text-align: left;
+}
+
+.appointments-title {
+    text-align: right;
+}
+
+.container {
+    display: flex;
 }
 
 .logo h2 {
     margin: 0;
-    color: #fff; /* Change logo color to white for visibility */
-    font-size: 22px;
+    color: #ffffff; /* White text for logo */
+    font-size: 24px;
+    margin-bottom: 30px;
 }
 
 .sidebar nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
-    flex-grow: 1; /* Allow the nav list to take available space */
+    flex-grow: 1;
     display: flex;
-    flex-direction: column; /* Stack list items vertically */
+    flex-direction: column; /* Stack items vertically */
 }
 
-/* Space between the first two items and the next two */
 .sidebar nav ul li {
-    margin-bottom: 20px; /* Space between each item */
-}
-
-.sidebar nav ul li:nth-child(2) {
-    margin-bottom: 30px; /* Additional space after the second item */
-}
-
-/* Adjust this to control the spacing for Help Center and Settings */
-.sidebar nav ul li:nth-child(n+3) {
-    margin-top: 10px; /* Optional: Space above Help Center and Settings */
+    margin-bottom: 20px; /* Space between items */
 }
 
 .sidebar nav ul li a {
     text-decoration: none;
-    color: #fff; /* Change text color to white for better visibility */
+    color: #fff; /* White text */
     font-size: 16px;
-    display: block;
-}
-
-
-.sidebar nav h3 {
-    font-size: 16px;
-    color: #555;
-    margin-top: 20px;
-}
-
-.sidebar a {
-    color: white;
-    margin: 10px 0;
-    text-decoration: none;
     display: block;
 }
 
 .sidebar a.active {
     font-weight: bold;
-    color: #a6c890;
+    color: #79c38a; /* Soft green for active links */
 }
 
 /* Main Content Styles */
 .main-content {
     width: calc(100% - 200px); /* Adjust for sidebar width */
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: #f4f4f4; /* Light grey for content background */
+    margin-left: 200px;
+    height: 100vh;
+    overflow-y: auto; /* Ensure content scrolls */
 }
 
+/* Dashboard Header */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #fff;
+    background-color: #fff; /* White background */
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }
 
 .dashboard-header .greeting h1 {
     margin: 0;
+    color: #333; /* Dark text for titles */
 }
 
 .dashboard-header .greeting p {
-    color: #888;
+    color: #888; /* Light grey for subtitle text */
 }
 
 .dashboard-header .profile img {
@@ -109,94 +98,153 @@ body {
     border-radius: 50%;
 }
 
-/* Content Wrapper Styles */
+/* Content Wrapper */
 .content-wrapper {
-    display: flex; /* Use flexbox for layout */
-    justify-content: space-between; /* Space out the sections */
-    margin-top: 20px; /* Space above the content wrapper */
+    display: flex; /* Flex layout */
+    justify-content: flex-start; /* Align items to start */
+    margin-top: 20px;
+    gap: 20px; /* Space between sections */
 }
 
-/* Patients and Billing Section */
-.patients-section {
-    flex: 1; /* Allow this section to grow */
-    background-color: #fff;
+/* Section Styles */
+.section {
+    flex: 1; /* Allow sections to grow */
+    background-color: #fff; /* White background for content areas */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    margin-right: 20px; /* Space between sections */
+    position: relative; /* Positioning context for absolute elements */
 }
 
-.patients-table {
+/* View Toggle */
+.view-toggle {
+    position: absolute; /* Absolute positioning */
+    right: 20px; /* Align to the right */
+    top: 20px; /* Align to the top */
+}
+
+.toggle-symbol {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #4a4a4a;
+}
+
+.section-header {
+    margin-bottom: 15px; /* Space below the header */
+    display: flex; /* Flex layout for header */
+    justify-content: space-between; /* Space between title and toggle */
+    align-items: center; /* Align items vertically */
+}
+
+/* Table Styles */
+.table {
     width: 100%;
     border-collapse: collapse;
 }
 
-.patients-table th,
-.patients-table td {
+.table th {
     padding: 15px;
     text-align: left;
+    background-color: #f9f9f9; /* Light grey for table headers */
+    color: #333; /* Dark text */
 }
 
-.patients-table th {
-    background-color: #f9f9f9;
-}
-
-.patients-table td {
-    background-color: #fff;
-}
-
-.patients-table img {
-    width: 40px;
-    margin-right: 10px;
-    vertical-align: middle;
-    border-radius: 50%;
+.table td {
+    padding: 15px;
+    background-color: #fff; /* White background for table rows */
 }
 
 /* Calendar Section */
 .calendar-section {
-    width: 300px; /* Set a specific width for the calendar */
-    background-color: #fff;
+    width: 300px; /* Fixed width for calendar */
+    background-color: #fff; /* White background for calendar */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Token Link Styles */
-.token-link {
-    background-color: transparent;
-    border: none;
-    color: #597593;
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-/* Custom styles for react-calendar */
+/* React Calendar Styles */
 .react-calendar {
-    border: none; /* Remove the default border */
+    border: none;
 }
 
 .react-calendar__tile {
-    height: 60px; /* Adjust tile height */
+    height: 60px;
 }
 
-/* Change the background color for the selected date */
 .react-calendar__tile--active {
-    background-color: #79c38a !important; /* Change this to your desired color (e.g., green) */
-    color: white; /* White text for the selected date */
+    background-color: #79c38a !important; /* Soft green for selected date */
+    color: white;
 }
 
-/* Remove background color for current date */
 .react-calendar__tile--now {
-    background-color: #ade0b8;
-    color: black; /* Default text color for current date */
-    font-weight: bold; /* Bold font for current date */
+    background-color: #f9f9f9; /* Light grey for today's date */
 }
 
-/* Additional hover effect for active date */
-.react-calendar__tile--active:hover {
-    background-color: #669470; /* Darker shade for hover effect when selected */
+.token-link {
+    font-size: 1rem; /* Set a default size for the toggle link */
 }
 
-.react-calendar__tile--now:hover {
-    background-color: #92d4a0 !important;
+.active {
+    font-weight: bold; /* Highlight active link */
+}
+
+.inactive {
+    font-size: 0.9rem; /* Smaller font for inactive links */
+}
+
+/* Title Alignment */
+.section-header h2 {
+    flex: 1; /* Take full space */
+}
+
+.section-header h2.patients-title {
+    text-align: left; /* Align patients title to the left */
+}
+
+.section-header h2.appointments-title {
+    text-align: right; /* Align appointments title to the right */
+}
+
+/* Toggle Container */
+.toggle-container {
+    display: flex;
+    justify-content: space-between; /* Space between Patients and Appointments */
+    align-items: center;
+    margin-bottom: 20px; /* Add some space below the toggle */
+}
+
+/* Title Alignment */
+.toggle-container h2 {
+    flex: 1;
+    margin: 0;
+}
+
+/* Patients View */
+.patients-view .toggle-symbol {
+    text-align: right; /* Align '>>' to the right in Patients view */
+}
+
+.patients-view h2.appointments-title {
+    text-align: right;
+}
+
+/* Appointments View */
+.appointments-view .toggle-symbol {
+    text-align: left; /* Align '<<' to the left in Appointments view */
+}
+
+.appointments-view h2.patients-title {
+    text-align: left;
+}
+
+/* Toggle Symbol */
+.toggle-symbol {
+    font-size: 1.5rem;
+    color: #4a4a4a;
+    cursor: pointer; /* Make it clickable */
+}
+
+.toggle-symbol.active {
+    font-weight: bold; /* Optional: Highlight active state */
 }

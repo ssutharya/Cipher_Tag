@@ -6,24 +6,31 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const [date, setDate] = useState(new Date());
+  const [view, setView] = useState('patients'); // State to toggle between patients and appointments
 
   const patients = [
-    { name: 'Adam Messy', age: 26, sex: 'Male', visits: 5 },
-    { name: 'Celine Aluista', age: 22, sex: 'Female', visits: 3 },
-    { name: 'Cool Guy', age: 30, sex: 'Male', visits: 2 }, // Added dummy patient
+    { name: 'Sad Guy', age: 26, sex: 'Male', token: 'A123' },
+    { name: 'Troubled Lady', age: 22, sex: 'Female', token: 'B456' },
+    { name: 'Cool Guy', age: 30, sex: 'Male', token: 'C789' },
+  ];
+
+  const appointments = [
+    { name: 'Sad Guy', date: '2024-09-30 10:00 AM', token: 'A123' },
+    { name: 'Troubled Lady', date: '2024-09-30 11:00 AM', token: 'B456' },
+    { name: 'Cool Guy', date: '2024-09-30 12:00 PM', token: 'C789' },
   ];
 
   return (
     <div className="container">
       <aside className="sidebar">
-        <h2>CipherTag™</h2>
+        <div className='logo'>
+          <h2>CipherTag™</h2>
+        </div>
         <nav>
-          <ul>
-            <a href="/" className="active">Patients</a>
-            <a href="/billing">Billing</a>
-            <a href="/help">Help Center</a>
-            <a href="/settings">Settings</a>
-          </ul>
+          <a href="/dashboard" className="active">Patients</a>
+          <a href="/billing">Billing</a>
+          <a href="/help">Help Center</a>
+          <a href="/settings">Settings</a>
         </nav>
       </aside>
 
@@ -31,7 +38,7 @@ const Dashboard = () => {
         <header className="dashboard-header">
           <div className="greeting">
             <h1>Good Morning, Dr. A!</h1>
-            <p>I hope you're in a good mood because there are {patients.length} patients waiting for you.</p>
+            <p>{view === 'patients' ? `I hope you're in a good mood because there are ${patients.length} patients waiting for you.` : `You have ${appointments.length} appointments today.`}</p>
           </div>
           <div className="profile">
             <img src="/doctor-profile.jpg" alt="Doctor Profile" />
@@ -39,31 +46,57 @@ const Dashboard = () => {
         </header>
 
         <div className="content-wrapper">
-          <section className="patients-section">
-            <div className="patient-list-header">
-              <h2>Patients</h2>
+          <section className={`section ${view === 'patients' ? 'patients-section' : 'appointments-section'}`}>
+            <div className="section-header">
+              {view === 'patients' ? (
+                <>
+                  <h2 className="patients-title">Patients</h2>
+                  <span 
+                    className="toggle-symbol"
+                    onClick={() => setView('appointments')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    &gt;&gt;
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span 
+                    className="toggle-symbol"
+                    onClick={() => setView('patients')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    &lt;&lt;
+                  </span>
+                  <h2 className="appointments-title">Appointments</h2>
+                </>
+              )}
             </div>
-            <table className="patients-table">
+            <table className={`table ${view === 'patients' ? 'patients-table' : 'appointments-table'}`}>
               <thead>
                 <tr>
-                  <th>Name (Age, Gender)</th>
+                  <th>{view === 'patients' ? 'Name (Age, Gender)' : 'Name (Date & Time)'}</th>
                   <th>Token No.</th>
                 </tr>
               </thead>
               <tbody>
-                {patients.map((patient, index) => (
+                {(view === 'patients' ? patients : appointments).map((item, index) => (
                   <tr key={index}>
                     <td>
-                      <img 
-                        src={`/public/${patient.name.toLowerCase().replace(' ', '')}.jpg`} 
-                        alt={patient.name} 
-                        onError={(e) => { e.target.src = '/patient-profile.jpg'; }}
-                      />
-                      {patient.name}<br />
-                      {patient.sex}, {patient.age} Years
+                      {view === 'patients' ? (
+                        <>
+                          {item.name}<br />
+                          {item.sex}, {item.age} Years
+                        </>
+                      ) : (
+                        <>
+                          {item.name}<br />
+                          Appointment on: {item.date}
+                        </>
+                      )}
                     </td>
                     <td>
-                      <Link to={`/patient-profile/${index}`}>#{index + 1}</Link> {/* Updated link path */}
+                      <Link to={`/patient-profile/${item.token}`}>#{item.token}</Link>
                     </td>
                   </tr>
                 ))}
@@ -71,7 +104,6 @@ const Dashboard = () => {
             </table>
           </section>
 
-          {/* Calendar Section */}
           <section className="calendar-section">
             <Calendar 
               onChange={setDate} 

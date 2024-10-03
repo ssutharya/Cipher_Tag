@@ -1,44 +1,127 @@
-import React, { useState } from 'react';
-import './PatientProfile.css';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import './PatientProfile.css'; // Ensure this has updated styles
 
 const PatientProfile = () => {
-  // Dummy patient data
-  const [patient, setPatient] = useState({
-    name: 'Cool Guy',
-    age: 26,
-    sex: 'Male',
-    contact: '9876543210',
-    case: 'Flu and Cold',
-    note: 'Cool guy, literally; Hes feeling cold, has a flu.'
-  });
+  const { token } = useParams();
+  const navigate = useNavigate(); // Initialize useNavigate
+  const [patient, setPatient] = useState(null);
+  const [editableCase, setEditableCase] = useState('');
+  const [newNote, setNewNote] = useState('');
+  const [history, setHistory] = useState([]);
+  const [isEditingCase, setIsEditingCase] = useState(false);
+  const [activeDropdownIndex, setActiveDropdownIndex] = useState(null);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-
-  // Toggle between edit and view mode for notes and case
-  const toggleEdit = () => {
-    setIsEditing(!isEditing);
+  const patientData = {
+    'A123': {
+      name: 'Sad Guy',
+      age: 26,
+      sex: 'Male',
+      contact: '7654398473',
+      address: '123 Example Street',
+      case: 'Sickness',
+      occupation: 'Engineer',
+      history: [
+        { date: '2023-09-30', case: 'Check-up', status: 'Ongoing' }
+      ],
+      vitals: { height: '175 cm', weight: '70 kg', bp: '120/80', pulse: '72 bpm' },
+      notes: []
+    },
+    'B456': {
+      name: 'Troubled Lady',
+      age: 32,
+      sex: 'Female',
+      contact: '0987654321',
+      address: '456 Trouble Road',
+      case: 'Cannot assault abusers.',
+      occupation: 'Designer',
+      history: [
+        { date: '2023-10-01', case: 'Consultation', status: 'Ongoing' }
+      ],
+      vitals: { height: '160 cm', weight: '60 kg', bp: '110/75', pulse: '70 bpm' },
+      notes: []
+    },
+    'C789': {
+      name: 'Cool Guy',
+      age: 29,
+      sex: 'Male',
+      contact: '0987654321',
+      address: '789 Sample Blvd',
+      case: 'Coolness Overload',
+      occupation: 'DJ',
+      history: [
+        { date: '2023-09-28', case: 'Lifestyle Consultation', status: 'Ongoing' }
+      ],
+      vitals: { height: '180 cm', weight: '75 kg', bp: '110/70', pulse: '65 bpm' },
+      notes: []
+    }
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
+  useEffect(() => {
+    const loadedPatient = patientData[token];
+    if (loadedPatient) {
+      setPatient(loadedPatient);
+      setEditableCase(loadedPatient.case);
+      setHistory(loadedPatient.history);
+    }
+  }, [token]); // Run when the token changes
+
+  if (!patient) {
+    return <h2>Patient not found!</h2>;
+  }
+
+  const addVisitToHistory = () => {
+    const newEntry = {
+      date: new Date().toISOString().split('T')[0],
+      case: editableCase,
+      status: 'Ongoing'
+    };
+    setHistory((prevHistory) => [...prevHistory, newEntry]);
   };
 
-  // Function to open the prescribe medicine pop-up
-  const openPrescribeModal = () => {
-    setShowModal(true);
+  const handleSaveChanges = () => {
+    setPatient((prevPatient) => ({
+      ...prevPatient,
+      case: editableCase,
+    }));
+    addVisitToHistory();
+    setIsEditingCase(false);
   };
 
-  const closePrescribeModal = () => {
-    setShowModal(false);
+  const handleAddNote = () => {
+    const date = new Date().toISOString().split('T')[0];
+    const updatedNotes = [...patient.notes, { date, note: newNote }];
+
+    setPatient((prevPatient) => ({
+      ...prevPatient,
+      notes: updatedNotes,
+    }));
+    setNewNote(''); // Clear the input field after adding
+  };
+
+  const handleStatusClick = (index) => {
+    setActiveDropdownIndex(index === activeDropdownIndex ? null : index);
+  };
+
+  const handleSelectStatus = (index, newStatus) => {
+    const updatedHistory = [...history];
+    updatedHistory[index].status = newStatus;
+    setHistory(updatedHistory);
+    setActiveDropdownIndex(null); // Close dropdown after selection
+  };
+
+  const handlePrescribeClick = () => {
+    navigate('/inventory'); // Navigate to the inventory page
   };
 
   return (
-    <div className="patient-profile">
+    <div className="container">
       <aside className="sidebar">
-        <h2>CipherTag™</h2>
+        <div className="logo">
+          <h2>CipherTag™</h2>
+        </div>
         <nav>
-          <a href="/Dashboard">Patients</a>
+          <a href="/dashboard">Patients</a>
           <a href="/billing">Billing</a>
           <a href="/help">Help Center</a>
           <a href="/settings">Settings</a>
@@ -46,63 +129,123 @@ const PatientProfile = () => {
       </aside>
 
       <main className="main-content">
-        <div className="patient-info">
-          <h2>Patient Profile</h2>
-          <img src="/patient-profile.jpg" alt="Patient" />
-          <p>Name: {patient.name}</p>
-          <p>Age: {patient.age}</p>
-          <p>Sex: {patient.sex}</p>
-          <p>Contact: {patient.contact}</p>
-
-          <div className="editable-field">
-            <p>Case: </p>
-            {isEditing ? (
-              <input
-                type="text"
-                value={patient.case}
-                onChange={(e) => setPatient({ ...patient, case: e.target.value })}
-              />
-            ) : (
-              <span>{patient.case}</span>
-            )}
-          </div>
-
-          <div className="note-section">
-            <h3>Notes</h3>
-            {isEditing ? (
-              <textarea
-                value={patient.note}
-                onChange={(e) => setPatient({ ...patient, note: e.target.value })}
-              />
-            ) : (
-              <p>{patient.note}</p>
-            )}
-          </div>
-
-          {isEditing ? (
-            <button className="save-btn" onClick={handleSave}>Save</button>
-          ) : (
-            <button className="save-btn" onClick={toggleEdit}>Edit</button>
-          )}
-
-          {/* Prescribe medicine button */}
-          <button className="prescribe-button" onClick={openPrescribeModal}>
-            Prescribe Medicine
-          </button>
-
-          {/* Prescribe Medicine Modal */}
-          {showModal && (
-            <div className="modal-overlay">
-              <div className="modal">
-                <h3>Prescribe Medicine</h3>
-                <input type="text" placeholder="Search medicines..." />
-                <button className="inventory-btn" onClick={() => window.location.href = '/inventory'}>
-                  Inventory
-                </button>
-                <button onClick={closePrescribeModal}>Close</button>
+        <div className="patient-info-container">
+          <div className="patient-info">
+            <img src="/patient-profile.jpg" alt="Patient" className="patient-photo" />
+            <div className="patient-details">
+              <div className="group">
+                <h2>{patient.name}</h2>
+                <p><strong>Age:</strong> {patient.age}</p>
+                <p><strong>Sex:</strong> {patient.sex}</p>
+              </div>
+              <div className="group">
+                <p><strong>Contact:</strong> {patient.contact}</p>
+                <p><strong>Address:</strong> {patient.address}</p>
+                <p><strong>Occupation:</strong> {patient.occupation}</p>
               </div>
             </div>
-          )}
+          </div>
+        </div>
+
+        <button className="prescribe-button" onClick={handlePrescribeClick}>Prescribe</button>
+
+        <div className="patient-editable">
+          <div className="editable-field">
+            <label htmlFor="case"><strong>Case</strong></label>
+            {isEditingCase ? (
+              <input
+                type="text"
+                id="case"
+                value={editableCase}
+                onChange={(e) => setEditableCase(e.target.value)}
+              />
+            ) : (
+              <p>{editableCase} <span className="edit-icon" onClick={() => setIsEditingCase(true)}>✎</span></p>
+            )}
+          </div>
+
+          <div className="editable-field">
+            <label htmlFor="notes"><strong>Add Notes</strong></label>
+            <input
+              id="notes"
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Enter new note"
+              className="note-input" // Added class for styling
+            />
+            <button onClick={handleAddNote} className="add-note-button save-button">Add Note</button>
+          </div>
+
+          {isEditingCase && <button className="save-button" onClick={handleSaveChanges}>Save Changes</button>}
+        </div>
+
+        <div className="patient-vitals">
+          <h3>Patient Vitals</h3>
+          <div className="vitals-box">
+            <p><strong>Height:</strong> {patient.vitals.height}</p>
+            <p><strong>Weight:</strong> {patient.vitals.weight}</p>
+            <p><strong>Blood Pressure:</strong> {patient.vitals.bp}</p>
+            <p><strong>Pulse:</strong> {patient.vitals.pulse}</p>
+          </div>
+        </div>
+
+        <div className="patient-history">
+          <h3>Patient History</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Case</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((visit, index) => (
+                <tr key={index}>
+                  <td>{visit.date}</td>
+                  <td>{visit.case}</td>
+                  <td>
+                    <div className="status-dropdown-container">
+                      <button
+                        className={`status-button ${visit.status === 'Cured' ? 'cured' : visit.status === 'Ongoing' ? 'ongoing' : 'discontinued'}`}
+                        onClick={() => handleStatusClick(index)}
+                      >
+                        {visit.status}
+                      </button>
+                      {activeDropdownIndex === index && (
+                        <div className="status-dropdown">
+                          {['Cured', 'Ongoing', 'Discontinued'].map((status) => (
+                            <div
+                              key={status}
+                              className="dropdown-option"
+                              onClick={() => handleSelectStatus(index, status)}
+                            >
+                              {status}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="patient-notes">
+          <h3>Notes Log</h3>
+          <div className="notes-container">
+            {patient.notes.length > 0 ? (
+              patient.notes.map((note, index) => (
+                <div key={index} className="note">
+                  <strong>{note.date}:</strong> {note.note}
+                </div>
+              ))
+            ) : (
+              <p>No notes available.</p>
+            )}
+          </div>
         </div>
       </main>
     </div>
