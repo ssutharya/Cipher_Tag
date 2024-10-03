@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
-from .models import Doctor, Patient, Appointment
-from .serializers import DoctorSerializer, PatientSerializer, AppointmentSerializer
+from .models import Doctor, Patient, Appointment, Medicine, Prescription, GlobalMedicine
+from .serializers import DoctorSerializer, PatientSerializer, AppointmentSerializer, MedicineSerializer, PrescriptionSerializer, GlobalMedicineSerializer
 from django.contrib.auth.models import User
 from .permissions import IsPatientOrAdmin, IsDoctorOrAdmin
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -26,7 +26,6 @@ def register_patient(request):
         user = User.objects.create_user(
             username=data['username'],
             password=data['password'],
-            email=data['email']
         )
         patient = Patient.objects.create(
             user=user,
@@ -180,3 +179,135 @@ def create_doctor(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+# Admin view to list all global medicines (service provider's inventory)
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def list_global_medicines(request):
+    global_medicines = GlobalMedicine.objects.all()
+    serializer = GlobalMedicineSerializer(global_medicines, many=True)
+    return Response(serializer.data)
+
+
+# Admin view to add medicine to a doctor's inventory
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def add_medicine_to_inventory(request):
+    data = request.data
+    try:
+        doctor = Doctor.objects.get(id=data['doctor_id'])  # Target doctor
+        global_medicine = GlobalMedicine.objects.get(id=data['global_medicine_id'])  # Medicine from global list
+
+        # Add the global medicine to the doctor's inventory
+        medicine = Medicine.objects.create(
+            doctor=doctor,
+            global_medicine=global_medicine
+        )
+
+        serializer = MedicineSerializer(medicine)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    except GlobalMedicine.DoesNotExist:
+        return Response({"error": "Global medicine not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Doctor.DoesNotExist:
+        return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+# Admin view to list all medicines in a doctor's inventory
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def list_doctor_inventory(request, doctor_id):
+    try:
+        doctor = Doctor.objects.get(id=doctor_id)
+        medicines = Medicine.objects.filter(doctor=doctor)
+        serializer = MedicineSerializer(medicines, many=True)
+        return Response(serializer.data)
+    except Doctor.DoesNotExist:
+        return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+
+# Doctor prescribing medicines to a patient during an appointment
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def prescribe_medicines(request, appointment_id):
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+        appointment = Appointment.objects.get(id=appointment_id, doctor=doctor)
+
+        medicines_data = request.data.get('medicines')
+        notes = request.data.get('notes', '')
+
+        # Create a new prescription
+        prescription = Prescription.objects.create(appointment=appointment, notes=notes)
+
+        # Add medicines from the doctor's inventory to the prescription
+        medicines = Medicine.objects.filter(id__in=medicines_data, doctor=doctor)
+        prescription.medicines.set(medicines)
+
+        prescription.save()
+        serializer = PrescriptionSerializer(prescription)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    except Appointment.DoesNotExist:
+        return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def patient_prescriptions(request):
+    try:
+        patient = Patient.objects.get(user=request.user)
+        prescriptions = Prescription.objects.filter(appointment__patient=patient)
+        serializer = PrescriptionSerializer(prescriptions, many=True)
+        return Response(serializer.data)
+    except Patient.DoesNotExist:
+        return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+# API to generate unique code and display it before confirming
+@api_view(['POST'])
+@permission_classes([IsAdminUser])  # Only admin can create global medicines
+def generate_medicine_code(request):
+    data = request.data
+    try:
+        # Create a temporary medicine object to generate the unique code
+        medicine = GlobalMedicine(
+            name=data['name'],
+            category=data['category'],
+            company=data['company']
+        )
+        unique_code = medicine.generate_unique_code()
+
+        # Show the generated code to the user, but don't save it yet
+        return Response({
+            'name': medicine.name,
+            'category': medicine.category,
+            'company': medicine.company,
+            'unique_code': unique_code
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# API to confirm and save the global medicine to the inventory
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def confirm_medicine_code(request):
+    data = request.data
+    try:
+        # Confirm the medicine with the code provided by the user
+        confirmed_medicine = GlobalMedicine.objects.create(
+            name=data['name'],
+            category=data['category'],
+            company=data['company'],
+            unique_code=data['unique_code'],  # Code must be passed exactly as generated
+            code_confirmed=True  # Now the code is confirmed
+        )
+
+        serializer = GlobalMedicineSerializer(confirmed_medicine)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
