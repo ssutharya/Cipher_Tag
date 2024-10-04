@@ -265,22 +265,30 @@ def patient_prescriptions(request):
     except Patient.DoesNotExist:
         return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
 
-
 # API to generate unique code and display it before confirming
 @api_view(['POST'])
 @permission_classes([IsAdminUser])  # Only admin can create global medicines
 def generate_medicine_code(request):
     data = request.data
     try:
+        # Check if all required fields are provided
+        if not data.get('name') or not data.get('category') or not data.get('company'):
+            return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Create a temporary medicine object to generate the unique code
         medicine = GlobalMedicine(
             name=data['name'],
             category=data['category'],
             company=data['company']
         )
+
+        # Generate unique code
         unique_code = medicine.generate_unique_code()
 
-        # Show the generated code to the user, but don't save it yet
+        # Log the generated code for debugging
+        print(f"Generated unique code: {unique_code}")
+
+        # Return the generated code in response but don't save the medicine yet
         return Response({
             'name': medicine.name,
             'category': medicine.category,
@@ -289,7 +297,8 @@ def generate_medicine_code(request):
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"Error in generating code: {str(e)}")
+        return Response({'error': 'Failed to generate unique code.'}, status=status.HTTP_400_BAD_REQUEST)
 
 # API to confirm and save the global medicine to the inventory
 @api_view(['POST'])
@@ -297,6 +306,10 @@ def generate_medicine_code(request):
 def confirm_medicine_code(request):
     data = request.data
     try:
+        # Ensure all fields are passed correctly
+        if not all(key in data for key in ('name', 'category', 'company', 'unique_code')):
+            return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Confirm the medicine with the code provided by the user
         confirmed_medicine = GlobalMedicine.objects.create(
             name=data['name'],
@@ -311,3 +324,18 @@ def confirm_medicine_code(request):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_role(request):
+    user = request.user
+    role = 'admin' if user.is_staff else 'doctor'  # Default roles
+    if hasattr(user, 'doctor'):
+        role = 'doctor'
+    elif hasattr(user, 'pharmacompany'):
+        role = 'pharma_company'
+    elif hasattr(user, 'hospitaladmin'):
+        role = 'hospital_admin'
+    
+    return Response({'role': role})    
