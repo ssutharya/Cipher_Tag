@@ -32,7 +32,10 @@ const Login = () => {
 
     try {
       const response = await axios.post(loginUrl, { username, password });
-      localStorage.setItem('access_token', response.data.access);
+      
+      // Store access and refresh tokens
+      localStorage.setItem('accessToken', response.data.access);
+      localStorage.setItem('refreshToken', response.data.refresh);
 
       // Redirect based on role
       if (role === 'admin') {

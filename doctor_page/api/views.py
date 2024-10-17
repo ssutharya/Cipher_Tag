@@ -11,6 +11,8 @@ from django.contrib.auth import authenticate
 import logging
 from datetime import datetime 
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsDoctorOrAdmin
 
 
 logger = logging.getLogger(__name__)
@@ -419,8 +421,9 @@ def get_role(request):
     return Response({'role': role})    
 
 
+
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsDoctorOrAdmin])  # This ensures only authenticated doctors or admins can access
 def doctor_patients(request):
     """
     Fetches all patients of the logged-in doctor, marking those who have appointments.
@@ -445,6 +448,7 @@ def doctor_patients(request):
 
     sorted_patients = sorted(patients_data, key=lambda p: p['hasAppointment'], reverse=True)
     return Response(sorted_patients)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
