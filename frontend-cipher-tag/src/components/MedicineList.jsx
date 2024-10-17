@@ -7,7 +7,7 @@ const MedicineList = () => {
 
   useEffect(() => {
     const fetchMedicines = async () => {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('accessToken');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       try {
         const response = await axios.get('http://localhost:8000/api/admin/global-medicines/', config);

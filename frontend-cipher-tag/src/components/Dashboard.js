@@ -7,8 +7,8 @@ import axios from 'axios';
 
 const Dashboard = () => {
   const [view, setView] = useState('patients'); // Current view: patients or appointments
-  const [patients, setPatients] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]); // Patients list
+  const [appointments, setAppointments] = useState([]); // Appointments list
   const [doctorName, setDoctorName] = useState(''); // State to hold the doctor's name
   const token = localStorage.getItem('accessToken'); // Authentication token
 
@@ -45,8 +45,8 @@ const Dashboard = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      
-      setPatients(response.data); // Set sorted patients directly
+
+      setPatients(response.data); // Set sorted patients directly from the API
     } catch (error) {
       console.error('Error fetching patients:', error);
     }
