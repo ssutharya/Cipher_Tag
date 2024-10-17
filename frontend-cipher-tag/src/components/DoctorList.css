@@ -1,0 +1,113 @@
+.doctor-list-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .specialization-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 15px 0;
+    margin-bottom: 20px;
+  }
+  
+  .specialization-tile {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    text-align: center;
+    width: 100px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .specialization-tile img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-bottom: 5px;
+  }
+  
+  .specialization-tile:hover {
+    transform: scale(1.05);
+  }
+  
+  .specialization-name {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .doctor-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .doctor-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .doctor-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 2px solid #ddd;
+  }
+  
+  .doctor-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .doctor-info h3 {
+    font-size: 16px;
+    color: #222;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  .doctor-info p {
+    font-size: 14px;
+    color: #666;
+    margin: 5px 0 0 0;
+  }
+  
+  .search-bar-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .search-bar {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    margin-right: 10px;
+    width: 250px;
+  }
+  
+  .filter-icon {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+  }
+  
