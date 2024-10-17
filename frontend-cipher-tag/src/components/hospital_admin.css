@@ -1,0 +1,64 @@
+/* Dashboard.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f9; /* Light background color */
+  }
+  
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 100px auto; /* Center the container */
+    padding: 20px;
+    background-color: #fff; /* White background for the dashboard */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
+    border-radius: 8px;
+  }
+  
+  h2 {
+    text-align: center;
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 75px;
+  }
+  
+  ul {
+    list-style-type: none; /* Remove default bullet points */
+    padding: 0;
+  }
+  
+  ul li {
+    margin: 15px 0; /* Add spacing between list items */
+  }
+  
+  ul li a {
+    display: block;
+    padding: 15px 20px;
+    background-color: #518b67; /* Blue background for the links */
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 6px;
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+    margin-bottom: 25px;
+  }
+  
+  ul li a:hover {
+    background-color: #477559; /* Darker blue on hover */
+  }
+  
+  @media (max-width: 768px) {
+    /* For mobile responsiveness */
+    .dashboard-container {
+      padding: 10px;
+    }
+  
+    ul li a {
+      font-size: 16px;
+      padding: 10px 15px;
+    }
+  }
+  

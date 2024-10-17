@@ -3,10 +3,10 @@ import { QRCodeCanvas } from 'qrcode.react';
 import './Inventory.css';
 
 const medicinesData = [
-  { id: 1, name: 'Paracetamol', image: '/images/paracetamol.jpg' },
-  { id: 2, name: 'Ibuprofen', image: '/images/ibuprofen.jpg' },
-  { id: 3, name: 'Amoxicillin', image: '/images/amoxicillin.jpg' },
-  { id: 4, name: 'Cetirizine', image: '/images/cetirizine.jpg' },
+  { id: 1, name: 'Paracetamol', image: '/pill.jpeg' },
+  { id: 2, name: 'Ibuprofen', image: '/pill.jpeg' },
+  { id: 3, name: 'Amoxicillin', image: '/pill.jpeg' },
+  { id: 4, name: 'Cetirizine', image: '/pill.jpeg' },
   // Add more medicines here...
 ];
 
@@ -39,13 +39,13 @@ const Inventory = () => {
   return (
     <div className="inventory-container">
       <h1>Medicine Inventory</h1>
-      <div className="inventory-grid">
+      <div className="medicine-grid"> {/* Corrected class name here */}
         {medicinesData.map((medicine) => (
           <div key={medicine.id} className="medicine-card">
             <img src={medicine.image} alt={medicine.name} />
             <h3>{medicine.name}</h3>
             {quantities[medicine.id] ? (
-              <div className="quantity-control">
+              <div className="quantity-controls">
                 <button onClick={() => handleDecrement(medicine.id)}>-</button>
                 <span>{quantities[medicine.id]}</span>
                 <button onClick={() => handleIncrement(medicine.id)}>+</button>

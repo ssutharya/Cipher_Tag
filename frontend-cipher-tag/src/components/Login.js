@@ -1,52 +1,50 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
-  const [username, setUsername] = useState(''); // Change state to 'username'
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('admin'); // Default role is 'admin'
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    let loginUrl;
 
-    // Simple validation
-    if (!username || !password) {
-      setErrorMessage('Please fill in both fields');
-      return;
+    // Determine the login URL based on the role selected
+    switch (role) {
+      case 'admin':
+        loginUrl = 'http://localhost:8000/api/admin/login/';
+        break;
+      case 'hospital_admin':
+        loginUrl = 'http://localhost:8000/api/user/login/';
+        break;
+      case 'doctor':
+        loginUrl = 'http://localhost:8000/api/doctor/login/';
+        break;
+      default:
+        setErrorMessage('Please select a valid role');
+        return;
     }
 
     try {
-      // Make a POST request to the backend
-      const response = await fetch('http://localhost:8000/api/doctor/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,  // Use 'username' here
-          password,
-        }),
-      });
+      const response = await axios.post(loginUrl, { username, password });
+      localStorage.setItem('access_token', response.data.access);
 
-      // Parse the response
-      const data = await response.json();
-
-      if (response.ok) {
-        // Successful login, store the access token
-        localStorage.setItem('accessToken', data.access);
-        localStorage.setItem('refreshToken', data.refresh);
-
-        // Redirect to the dashboard
+      // Redirect based on role
+      if (role === 'admin') {
         navigate('/dashboard');
-      } else {
-        // Handle error from the backend
-        setErrorMessage(data.error || 'Login failed');
+      } else if (role === 'hospital_admin') {
+        navigate('/hospital-admin');
+      } else if (role === 'doctor') {
+        navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      setErrorMessage('An error occurred. Please try again later.');
+      console.error('Login error:', error.response);
+      setErrorMessage('Login failed. Please check your credentials.');
     }
   };
 
@@ -62,12 +60,20 @@ const Login = () => {
         <h2>CipherTag™</h2>
         <form onSubmit={handleLogin}>
           <div className="input-group">
-            <label>Username</label> {/* Update label */}
+            <label>Role</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="admin">Admin</option>
+              <option value="hospital_admin">Hospital Admin</option>
+              <option value="doctor">Doctor</option>
+            </select>
+          </div>
+          <div className="input-group">
+            <label>Username</label>
             <input
-              type="text"  // Change input type to 'text'
-              placeholder="Enter your username"  // Update placeholder
+              type="text"
+              placeholder="Enter your username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}  // Update to set 'username'
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>

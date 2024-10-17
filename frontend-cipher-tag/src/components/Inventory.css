@@ -5,6 +5,7 @@
   padding: 20px;
   background-color: #f7f7f7;
   min-height: 100vh;
+  overflow-y: auto; /* Allows vertical scrolling */
 }
 
 .inventory-header {
@@ -21,6 +22,7 @@
 }
 
 .bill-button {
+  margin-top: 75px;
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -35,11 +37,11 @@
   background-color: #45a049;
 }
 
-/* Medicines Grid */
+/* Medicines Flexbox Grid */
 .medicine-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping to a new row when space runs out */
+  gap: 20px; /* Space between items */
 }
 
 .medicine-card {
@@ -50,6 +52,8 @@
   text-align: center;
   padding: 15px;
   transition: transform 0.3s ease;
+  width: 150px; /* Fixed width */
+  height: 150px; /* Fixed height */
 }
 
 .medicine-card:hover {
@@ -69,42 +73,92 @@
   margin-bottom: 10px;
 }
 
+/* Jira-like Add Button */
+.add-button {
+  display: inline-block;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+  padding: 5px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: black;
+  color: white;
+}
+
 /* Increment/Decrement Buttons */
 .quantity-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   margin-top: 10px;
 }
 
 .quantity-controls button {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  background-color: white;
+  color: black;
+  border: 1px solid black;
   font-size: 1.2rem;
   padding: 5px 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.quantity-controls button.increment {
-  background-color: #4CAF50;
+/* Increment/Decrement Button Styling (Jira-like) */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.quantity-controls button:hover {
-  background-color: #d32f2f;
+.quantity-control button {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 5px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded edges */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.quantity-controls button.increment:hover {
-  background-color: #45a049;
+.quantity-control button:hover {
+  background-color: black;
+  color: white; /* Invert colors on hover */
 }
 
-.quantity-display {
+.quantity-control span {
+  margin: 0 10px;
   font-size: 1.2rem;
   font-weight: bold;
-  color: #333;
+  color: black;
+  border: 1px solid black;
+  padding: 5px 15px;
+  border-radius: 5px; /* Matching rounded edges */
+  background-color: white;
+}
+
+.quantity-controls .decrement {
+  border-radius: 5px 0 0 5px;
+}
+
+.quantity-controls .increment {
+  border-radius: 0 5px 5px 0;
+}
+
+.quantity-controls .quantity-display {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0 15px;
 }
 
 /* QR Code Styling */

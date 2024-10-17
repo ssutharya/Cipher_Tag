@@ -1,172 +1,29 @@
-/* General Styles */
+/* Add this to enable vertical scrolling */
 .container {
   display: flex;
-}
-
-.logo h2 {
-  margin: 0;
-  color: #ffffff;
-  font-size: 24px;
-  margin-bottom: 30px;
-}
-
-.sidebar {
-  width: 250px;
-  background-color: #333;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #e0e0e0;
-}
-
-.sidebar h2 {
-  font-size: 20px;
-  margin-bottom: 30px;
-}
-
-.sidebar nav a {
-  color: #ffffff;
-  font-size: 16px;
-  text-decoration: none;
-  margin-bottom: 15px;
-  display: block;
-}
-
-.sidebar nav a:hover {
-  color: #bde3c8;
+  overflow: hidden; /* Prevent horizontal scroll */
 }
 
 .main-content {
   flex-grow: 1;
   padding: 20px;
   margin-left: 250px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 100vh; /* Ensure it doesn't exceed the view height */
 }
 
-.patient-info-container {
-  display: flex;
-  align-items: flex-start; /* Align image and info on top */
-  gap: 20px;
-}
-
-.patient-photo {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-}
-
-.patient-details {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  flex-grow: 1;
-}
-
-.patient-basic-info,
-.patient-contact-info {
-  margin: 10px 0;
-}
-
-.patient-basic-info {
-  display: flex;
-  gap: 20px; /* Space between age and sex */
-}
-
-.patient-other-info {
-  display: flex;
-  flex-direction: column;
+/* Styles for the new prescription container */
+.prescription-container {
   background-color: #f9f9f9;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  border-left: 1px solid #ddd;
+  padding: 20px;
+  width: 300px; /* Adjust width as needed */
 }
 
-.patient-other-info p {
-  margin: 5px 0;
-}
-
-.patient-vitals,
-.patient-editable,
-.patient-history {
-  margin-top: 20px;
-}
-
-.patient-vitals {
-  display: flex;
-  gap: 20px;
-}
-
-.vital-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  text-align: center;
-  flex-grow: 1;
-}
-
-.vital-status-normal {
-  color: green;
+.prescription-title {
+  font-size: 1.2rem;
   font-weight: bold;
-}
-
-/* Editable fields */
-.editable-field {
   margin-bottom: 10px;
-}
-
-textarea {
-  width: 100%;
-  height: 100px;
-}
-
-.edit-icon {
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 5px;
-}
-
-.save-button {
-  background-color: #4caf50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.save-button:hover {
-  background-color: #45a049;
-}
-
-/* Prescription Button */
-.prescribe-button {
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.prescribe-button:hover {
-  background-color: #0056b3;
-}
-
-/* Prescription Section */
-.prescription-area {
-  margin-top: 30px;
-  padding: 15px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .prescription-search {
@@ -178,7 +35,6 @@ textarea {
   margin-bottom: 20px;
 }
 
-/* Medicine Tile */
 .prescribed-medicine {
   display: flex;
   flex-direction: column;
@@ -203,7 +59,7 @@ textarea {
   margin-top: 10px;
 }
 
-.prescribed-medicine .medicine-quantity {
+.medicine-quantity {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -237,6 +93,194 @@ textarea {
   font-size: 1.2rem;
 }
 
+/* Cart Section */
+.cart-section {
+  margin-top: 20px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Prescription Button */
+.prescribe-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4f8965;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: block; /* Ensure it takes a new line */
+}
+
+.prescribe-button:hover {
+  background-color: #45a049;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #333;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.sidebar nav a {
+  color: #ffffff;
+  font-size: 16px;
+  text-decoration: none;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.sidebar nav a:hover {
+  color: #bde3c8;
+}
+
+/* Patient Info Section */
+.patient-info-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.patient-photo-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 200px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.patient-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.patient-details-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  flex-grow: 1;
+}
+
+.patient-details-box h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.patient-info-row {
+  display: flex;
+  gap: 20px;
+}
+
+.patient-info-item {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  flex-grow: 1;
+}
+
+/* Vitals Section */
+.vitals-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.vital-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  text-align: center;
+  flex-grow: 1;
+  cursor: pointer;
+}
+
+.vital-card:hover {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.vital-editable {
+  border: 1px solid #ccc;
+  padding: 5px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Editable fields */
+.editable-field {
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  height: 100px;
+}
+
+.edit-icon {
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.save-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover {
+  background-color: #45a049;
+}
+
+/* Prescription Section */
+.prescription-area {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Patient History Table */
 .patient-history {
   margin-top: 20px;
@@ -264,14 +308,9 @@ tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Status Dropdown */
 .status-dropdown {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  z-index: 1;
-  width: 100%;
+  position: relative; /* Allow absolute positioning of dropdown options */
+  display: inline-block; /* Allow dropdown to be inline */
 }
 
 .status-button {
@@ -281,6 +320,31 @@ tr:nth-child(even) {
   cursor: pointer;
   min-width: 100px;
   text-align: center;
+}
+
+.dropdown-options {
+  position: absolute; /* Position options absolutely within the dropdown */
+  bottom: 100%; /* Position it above the button */
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 1; /* Ensure it appears above other content */
+  width: 100%;
+  display: none; /* Hide by default */
+}
+
+.dropdown-options.show {
+  display: block; /* Show when the toggle is active */
+}
+
+.dropdown-option {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.dropdown-option:hover {
+  background-color: #f0f0f0;
 }
 
 .status-button.cured {
@@ -293,13 +357,4 @@ tr:nth-child(even) {
 
 .status-button.discontinued {
   border-color: #f44336;
-}
-
-.dropdown-option {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.dropdown-option:hover {
-  background-color: #f0f0f0;
 }
