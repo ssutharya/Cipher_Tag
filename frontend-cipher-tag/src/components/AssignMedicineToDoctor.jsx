@@ -11,14 +11,14 @@ const AssignMedicineToDoctor = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       const response = await axios.get('http://localhost:8000/api/list-doctors/', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setDoctors(response.data);
     };
 
     const fetchGlobalMedicines = async () => {
       const response = await axios.get('http://localhost:8000/api/list-global-medicines/', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       setGlobalMedicines(response.data);
     };
@@ -35,7 +35,7 @@ const AssignMedicineToDoctor = () => {
 
     try {
       const response = await axios.post('http://localhost:8000/api/add-medicine-to-inventory/', data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       alert('Medicine successfully assigned to doctor!');
     } catch (error) {

@@ -25,7 +25,7 @@ const AddGlobalMedicine = () => {
 
     try {
       const response = await axios.post('http://localhost:8000/api/admin/generate-medicine-code/', data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
 
       // Set the unique code from the response and display in a separate box
@@ -51,7 +51,7 @@ const AddGlobalMedicine = () => {
 
     try {
       await axios.post('http://localhost:8000/api/admin/confirm-medicine-code/', data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       alert('Medicine successfully added!');
       resetForm();  // Reset form after successful addition
