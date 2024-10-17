@@ -1,24 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Dashboard.css';
+import axios from 'axios';
 
 const Dashboard = () => {
-  const [date, setDate] = useState(new Date());
-  const [view, setView] = useState('patients'); // State to toggle between patients and appointments
+  const [view, setView] = useState('patients'); // Current view: patients or appointments
+  const [patients, setPatients] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [doctorName, setDoctorName] = useState(''); // State to hold the doctor's name
+  const token = localStorage.getItem('accessToken'); // Authentication token
 
-  const patients = [
-    { name: 'Sad Guy', age: 26, sex: 'Male', token: 'A123' },
-    { name: 'Troubled Lady', age: 22, sex: 'Female', token: 'B456' },
-    { name: 'Cool Guy', age: 30, sex: 'Male', token: 'C789' },
-  ];
+  useEffect(() => {
+    fetchDoctorName(); // Fetch the doctor's name on component mount
 
-  const appointments = [
-    { name: 'Sad Guy', date: '2024-09-30 10:00 AM', token: 'A123' },
-    { name: 'Troubled Lady', date: '2024-09-30 11:00 AM', token: 'B456' },
-    { name: 'Cool Guy', date: '2024-09-30 12:00 PM', token: 'C789' },
-  ];
+    // Fetch data based on the current view
+    if (view === 'appointments') {
+      fetchAllAppointments(); // Fetch all appointments when the appointments view is selected
+    } else {
+      fetchPatients(); // Fetch patients when in patient view
+    }
+  }, [view]); // Re-fetch only when the view changes
+
+  // Fetch the doctor's name
+  const fetchDoctorName = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/doctor/profile/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setDoctorName(response.data.name);
+    } catch (error) {
+      console.error('Error fetching doctor profile:', error);
+    }
+  };
+
+  // Fetch all patients for the doctor, including their appointment status
+  const fetchPatients = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/doctor/patients/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      setPatients(response.data); // Set sorted patients directly
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+    }
+  };
+
+  // Fetch all appointments (ignore selected date)
+  const fetchAllAppointments = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/admin/appointments/', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setAppointments(response.data); // Set sorted appointments
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
+  };
 
   return (
     <div className="container">
@@ -27,7 +74,7 @@ const Dashboard = () => {
           <h2>CipherTag™</h2>
         </div>
         <nav>
-          <a href="/dashboard" className="active">Patients</a>
+          <a href="/dashboard" className={view === 'patients' ? 'active' : ''}>Patients</a>
           <a href="/billing">Billing</a>
           <a href="/help">Help Center</a>
           <a href="/settings">Settings</a>
@@ -37,8 +84,10 @@ const Dashboard = () => {
       <main className="main-content">
         <header className="dashboard-header">
           <div className="greeting">
-            <h1>Good Morning, Dr. A!</h1>
-            <p>{view === 'patients' ? `I hope you're in a good mood because there are ${patients.length} patients waiting for you.` : `You have ${appointments.length} appointments today.`}</p>
+            <h1>Good Morning, Dr. {doctorName}!</h1>
+            <p>{view === 'patients' 
+              ? `I hope you're in a good mood because there are ${patients.length} patients waiting for you.` 
+              : `You have ${appointments.length} appointments scheduled.`}</p>
           </div>
           <div className="profile">
             <img src="/doctor-profile.jpg" alt="Doctor Profile" />
@@ -77,6 +126,7 @@ const Dashboard = () => {
                 <tr>
                   <th>{view === 'patients' ? 'Name (Age, Gender)' : 'Name (Date & Time)'}</th>
                   <th>Token No.</th>
+                  {view === 'patients' && <th>Appointment Status</th>}
                 </tr>
               </thead>
               <tbody>
@@ -90,14 +140,17 @@ const Dashboard = () => {
                         </>
                       ) : (
                         <>
-                          {item.name}<br />
-                          Appointment on: {item.date}
+                          {item.patient.name}<br />
+                          Appointment on: {new Date(item.appointment_date).toLocaleString()}
                         </>
                       )}
                     </td>
                     <td>
                       <Link to={`/patient-profile/${item.token}`}>#{item.token}</Link>
                     </td>
+                    {view === 'patients' && (
+                      <td>{item.hasAppointment ? 'Booked' : 'Not Booked'}</td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -106,8 +159,6 @@ const Dashboard = () => {
 
           <section className="calendar-section">
             <Calendar 
-              onChange={setDate} 
-              value={date} 
               className="react-calendar" 
             />
           </section>

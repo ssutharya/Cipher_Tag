@@ -8,6 +8,23 @@ from django.contrib.auth.models import User
 from .permissions import IsPatientOrAdmin, IsDoctorOrAdmin
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+import logging
+from datetime import datetime 
+from django.shortcuts import get_object_or_404
+
+
+logger = logging.getLogger(__name__)
+
+# Doctor Profile API
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def doctor_profile(request):
+    doctor = Doctor.objects.get(user=request.user)
+    data = {
+        "name": doctor.name,
+        "specialization": doctor.specialization
+    }
+    return Response(data)
 
 # List all available doctors (no authentication needed)
 @api_view(['GET'])
@@ -137,25 +154,86 @@ def list_patients(request):
     serializer = PatientSerializer(patients, many=True)
     return Response(serializer.data)
 
-# List all appointments (admin only)
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def list_appointments(request):
-    appointments = Appointment.objects.all()
-    serializer = AppointmentSerializer(appointments, many=True)
-    return Response(serializer.data)
-
-# List doctor's own patients (doctor login required)
-@api_view(['GET'])
-@permission_classes([IsAuthenticated, IsDoctorOrAdmin])
-def list_doctor_patients(request):
     try:
         doctor = Doctor.objects.get(user=request.user)
         appointments = Appointment.objects.filter(doctor=doctor)
-        serializer = AppointmentSerializer(appointments, many=True)
+
+        # Handle date filtering
+        date_param = request.GET.get('date')
+        if date_param:
+            filter_date = datetime.strptime(date_param, "%Y-%m-%d").date()
+            appointments = appointments.filter(appointment_date__date=filter_date)
+
+        # Handle 'consulted' (finished) status filtering
+        consulted_param = request.GET.get('consulted')
+        if consulted_param is not None:
+            consulted = consulted_param.lower() == 'true'
+            appointments = appointments.filter(consulted=consulted)
+
+        # Serialize the data
+        data = [{
+            "patient": {
+                "name": appt.patient.name,
+                "age": appt.patient.age,
+                "sex": appt.patient.sex
+            },
+            "appointment_date": appt.appointment_date,
+            "token": appt.id,  # Unique identifier for the appointment
+            "consulted": appt.consulted  # Include consulted status
+        } for appt in appointments]
+
+        return Response(data)
+    except Doctor.DoesNotExist:
+        return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def mark_appointment_consulted(request, appointment_id):
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+        appointment = Appointment.objects.get(doctor=doctor, id=appointment_id)
+
+        appointment.consulted = True
+        appointment.save()
+
+        return Response({"message": "Appointment marked as consulted"})
+    except Appointment.DoesNotExist:
+        return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsDoctorOrAdmin])
+def list_doctor_patients(request):
+    logger.debug(f"Request by user {request.user} to fetch patients") 
+    try:
+        # Retrieve the doctor instance based on the logged-in user
+        doctor = Doctor.objects.get(user=request.user)
+        
+        # Fetch all patients related to the doctor's appointments
+        patients = Patient.objects.filter(appointment__doctor=doctor).distinct()
+
+        # Debug: log the retrieved patients
+        logger.debug(f"Patients retrieved: {[patient.name for patient in patients]}")
+        
+        # Serialize the patient data
+        serializer = PatientSerializer(patients, many=True)
+        
         return Response(serializer.data)
     except Doctor.DoesNotExist:
         return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error retrieving patients: {str(e)}")
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # Create a new doctor profile (admin only)
 @api_view(['POST'])
@@ -339,3 +417,42 @@ def get_role(request):
         role = 'hospital_admin'
     
     return Response({'role': role})    
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def doctor_patients(request):
+    """
+    Fetches all patients of the logged-in doctor, marking those who have appointments.
+    """
+    doctor = get_object_or_404(Doctor, user=request.user)
+    patients = Patient.objects.filter(user__doctor=doctor)
+
+    # Get all appointments for this doctor
+    appointments = Appointment.objects.filter(doctor=doctor)
+
+    # Add 'hasAppointment' to each patient object
+    patients_data = []
+    for patient in patients:
+        has_appointment = appointments.filter(patient=patient).exists()
+        patients_data.append({
+            'id': patient.id,
+            'name': patient.name,
+            'age': patient.age,
+            'sex': patient.sex,
+            'hasAppointment': has_appointment
+        })
+
+    sorted_patients = sorted(patients_data, key=lambda p: p['hasAppointment'], reverse=True)
+    return Response(sorted_patients)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def doctor_appointments(request):
+    """
+    Fetches all appointments of the logged-in doctor.
+    """
+    doctor = get_object_or_404(Doctor, user=request.user)
+    appointments = Appointment.objects.filter(doctor=doctor).order_by('appointment_date')
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)
