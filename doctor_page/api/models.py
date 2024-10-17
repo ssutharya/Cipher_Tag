@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import random
+from datetime import datetime
 
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -32,16 +33,16 @@ class Patient(models.Model):
         return self.name
 
 
-
 class Appointment(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     appointment_date = models.DateTimeField()
     fee_paid = models.BooleanField(default=False)
+    consulted = models.BooleanField(default=False)  # New field to track if the appointment is finished
 
     def __str__(self):
         return f"Appointment with Dr. {self.doctor.name} on {self.appointment_date}"
-    
+  
 
 # class Medicine(models.Model):
 #     name = models.CharField(max_length=100)
