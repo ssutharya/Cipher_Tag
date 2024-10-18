@@ -150,7 +150,7 @@ def book_appointment(request):
 
 # List all patients (admin only)
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def list_patients(request):
     patients = Patient.objects.all()
     serializer = PatientSerializer(patients, many=True)
@@ -423,7 +423,7 @@ def get_role(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsDoctorOrAdmin])  # This ensures only authenticated doctors or admins can access
+@permission_classes([IsAuthenticated])  # This ensures only authenticated doctors or admins can access
 def doctor_patients(request):
     """
     Fetches all patients of the logged-in doctor, marking those who have appointments.

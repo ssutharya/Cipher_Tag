@@ -23,6 +23,7 @@ const DoctorList = () => {
 
     fetchDoctors();
   }, []);
+  }, []);
 
   // Handle search input change
   const handleSearch = (event) => {

@@ -26,7 +26,7 @@ const MedicineList = () => {
       <ul>
         {medicines.map(medicine => (
           <li key={medicine.id}>
-            {medicine.name} - {medicine.company} ({medicine.category})
+            {medicine.unique_code}-{medicine.name} - {medicine.company} ({medicine.category})
           </li>
         ))}
       </ul>
