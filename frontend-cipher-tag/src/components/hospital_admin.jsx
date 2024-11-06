@@ -6,12 +6,11 @@ import './hospital_admin.css';
 const Dashboard = () => {
   return (
     <div className="dashboard-container">
-      <h2>Admin Dashboard</h2>
+      <h2>Hospital Admin Dashboard</h2>
       <ul>
-        <li><Link to="/doctors">View Doctors</Link></li>
-        <li><Link to="/global-medicine">Add Global Medicine</Link></li>
-        <li><Link to="/medicines">Manage Global Medicines</Link></li>
-        <li><Link to=""></Link></li>
+        <li><Link to="/doctors">View and Manage Doctors</Link></li>
+        <li><Link to="">Add Patients</Link></li>
+        <li><Link to="/global-medicine">Manage Global Medicines</Link></li>
       </ul>
     </div>
   );

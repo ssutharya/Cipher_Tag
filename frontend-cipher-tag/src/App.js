@@ -7,6 +7,7 @@ import Dashboard_2 from './components/hospital_admin';
 import DoctorList from './components/DoctorList';
 import MedicineList from './components/MedicineList';
 import AddGlobalMedicine from './components/AddGlobalMedicine';
+import PharmaDashboard from './components/PharmaDashboard';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/doctors" element={<DoctorList />} />
         <Route path="/medicines" element={<MedicineList />} />
         <Route path="/add-global-medicine" element={<AddGlobalMedicine />} />
+        <Route path="/pharma-company" element={<PharmaDashboard />} />
       </Routes>
     </Router>
   );

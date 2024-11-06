@@ -192,50 +192,7 @@ def list_appointments(request):
         return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-
-@api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def mark_appointment_consulted(request, appointment_id):
-    try:
-        doctor = Doctor.objects.get(user=request.user)
-        appointment = Appointment.objects.get(doctor=doctor, id=appointment_id)
-
-        appointment.consulted = True
-        appointment.save()
-
-        return Response({"message": "Appointment marked as consulted"})
-    except Appointment.DoesNotExist:
-        return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated, IsDoctorOrAdmin])
-def list_doctor_patients(request):
-    logger.debug(f"Request by user {request.user} to fetch patients") 
-    try:
-        # Retrieve the doctor instance based on the logged-in user
-        doctor = Doctor.objects.get(user=request.user)
         
-        # Fetch all patients related to the doctor's appointments
-        patients = Patient.objects.filter(appointment__doctor=doctor).distinct()
-
-        # Debug: log the retrieved patients
-        logger.debug(f"Patients retrieved: {[patient.name for patient in patients]}")
-        
-        # Serialize the patient data
-        serializer = PatientSerializer(patients, many=True)
-        
-        return Response(serializer.data)
-    except Doctor.DoesNotExist:
-        return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        logger.error(f"Error retrieving patients: {str(e)}")
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # Create a new doctor profile (admin only)
 @api_view(['POST'])
@@ -260,90 +217,6 @@ def create_doctor(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-# Admin view to list all global medicines (service provider's inventory)
-@api_view(['GET'])
-@permission_classes([IsAdminUser])
-def list_global_medicines(request):
-    global_medicines = GlobalMedicine.objects.all()
-    serializer = GlobalMedicineSerializer(global_medicines, many=True)
-    return Response(serializer.data)
-
-
-# Admin view to add medicine to a doctor's inventory
-@api_view(['POST'])
-@permission_classes([IsAdminUser])
-def add_medicine_to_inventory(request):
-    data = request.data
-    try:
-        doctor = Doctor.objects.get(id=data['doctor_id'])  # Target doctor
-        global_medicine = GlobalMedicine.objects.get(id=data['global_medicine_id'])  # Medicine from global list
-
-        # Add the global medicine to the doctor's inventory
-        medicine = Medicine.objects.create(
-            doctor=doctor,
-            global_medicine=global_medicine
-        )
-
-        serializer = MedicineSerializer(medicine)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    except GlobalMedicine.DoesNotExist:
-        return Response({"error": "Global medicine not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Doctor.DoesNotExist:
-        return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
-
-
-# Admin view to list all medicines in a doctor's inventory
-@api_view(['GET'])
-@permission_classes([IsAdminUser])
-def list_doctor_inventory(request, doctor_id):
-    try:
-        doctor = Doctor.objects.get(id=doctor_id)
-        medicines = Medicine.objects.filter(doctor=doctor)
-        serializer = MedicineSerializer(medicines, many=True)
-        return Response(serializer.data)
-    except Doctor.DoesNotExist:
-        return Response({"error": "Doctor not found"}, status=status.HTTP_404_NOT_FOUND)
-
-# Doctor prescribing medicines to a patient during an appointment
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def prescribe_medicines(request, appointment_id):
-    try:
-        doctor = Doctor.objects.get(user=request.user)
-        appointment = Appointment.objects.get(id=appointment_id, doctor=doctor)
-
-        medicines_data = request.data.get('medicines')
-        notes = request.data.get('notes', '')
-
-        # Create a new prescription
-        prescription = Prescription.objects.create(appointment=appointment, notes=notes)
-
-        # Add medicines from the doctor's inventory to the prescription
-        medicines = Medicine.objects.filter(id__in=medicines_data, doctor=doctor)
-        prescription.medicines.set(medicines)
-
-        prescription.save()
-        serializer = PrescriptionSerializer(prescription)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    except Appointment.DoesNotExist:
-        return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def patient_prescriptions(request):
-    try:
-        patient = Patient.objects.get(user=request.user)
-        prescriptions = Prescription.objects.filter(appointment__patient=patient)
-        serializer = PrescriptionSerializer(prescriptions, many=True)
-        return Response(serializer.data)
-    except Patient.DoesNotExist:
-        return Response({"error": "Patient not found"}, status=status.HTTP_404_NOT_FOUND)
 
 # API to generate unique code and display it before confirming
 @api_view(['POST'])
@@ -405,51 +278,7 @@ def confirm_medicine_code(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_role(request):
-    user = request.user
-    role = 'admin' if user.is_staff else 'doctor'  # Default roles
-    if hasattr(user, 'doctor'):
-        role = 'doctor'
-    elif hasattr(user, 'pharmacompany'):
-        role = 'pharma_company'
-    elif hasattr(user, 'hospitaladmin'):
-        role = 'hospital_admin'
     
-    return Response({'role': role})    
-
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])  # This ensures only authenticated doctors or admins can access
-def doctor_patients(request):
-    """
-    Fetches all patients of the logged-in doctor, marking those who have appointments.
-    """
-    doctor = get_object_or_404(Doctor, user=request.user)
-    patients = Patient.objects.filter(user__doctor=doctor)
-
-    # Get all appointments for this doctor
-    appointments = Appointment.objects.filter(doctor=doctor)
-
-    # Add 'hasAppointment' to each patient object
-    patients_data = []
-    for patient in patients:
-        has_appointment = appointments.filter(patient=patient).exists()
-        patients_data.append({
-            'id': patient.id,
-            'name': patient.name,
-            'age': patient.age,
-            'sex': patient.sex,
-            'hasAppointment': has_appointment
-        })
-
-    sorted_patients = sorted(patients_data, key=lambda p: p['hasAppointment'], reverse=True)
-    return Response(sorted_patients)
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def doctor_appointments(request):
