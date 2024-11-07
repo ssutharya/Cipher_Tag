@@ -17,13 +17,13 @@ const Login = () => {
     // Determine the login URL based on the role selected
     switch (role) {
       case 'admin':
-        loginUrl = 'http://localhost:8000/api/admin/login/';
+        loginUrl = 'http://34.47.208.77/api/admin/login/';
         break;
       case 'hospital_admin':
-        loginUrl = 'http://localhost:8000/api/user/login/';
+        loginUrl = 'http://34.47.208.77/api/user/login/';
         break;
       case 'doctor':
-        loginUrl = 'http://localhost:8000/api/doctor/login/';
+        loginUrl = 'http://34.47.208.77/api/doctor/login/';
         break;
       default:
         setErrorMessage('Please select a valid role');

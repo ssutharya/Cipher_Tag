@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const fetchDoctorName = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/doctor/profile/', {
+      const response = await axios.get('http://34.47.208.77/api/doctor/profile/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -31,7 +31,7 @@ const Dashboard = () => {
 
   const fetchAllAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/admin/appointments/', {
+      const response = await axios.get('http://34.47.208.77/api/admin/appointments/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
