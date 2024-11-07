@@ -17,7 +17,7 @@ const DoctorList = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       try {
-        const response = await axios.get('http://localhost:8000/api/doctors/', config);
+        const response = await axios.get('http://34.47.208.77/api/doctors/', config);
         setDoctors(response.data);
       } catch (error) {
         console.error(error);

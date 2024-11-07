@@ -24,7 +24,7 @@ const AddGlobalMedicine = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8000/api/admin/generate-medicine-code/', data, {
+      const response = await axios.post('http://34.47.208.77/admin/generate-medicine-code/', data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
 
@@ -50,7 +50,7 @@ const AddGlobalMedicine = () => {
     };
 
     try {
-      await axios.post('http://localhost:8000/api/admin/confirm-medicine-code/', data, {
+      await axios.post('http://34.47.208.77/api/admin/confirm-medicine-code/', data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       alert('Medicine successfully added!');

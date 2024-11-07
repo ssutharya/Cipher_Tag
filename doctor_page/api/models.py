@@ -94,13 +94,19 @@ class Medicine(models.Model):
 
 
 
-class Prescription(models.Model):
-    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
-    medicines = models.ManyToManyField(Medicine)
-    notes = models.TextField(blank=True)
 
-    def __str__(self):
-        return f"Prescription for {self.appointment.patient.name}"
     
 
+
+class Prescription(models.Model):
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
+    notes = models.TextField(blank=True, null=True)
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)  # QR code storage
+
+
+class PrescriptionItem(models.Model):
+    prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='prescription_items')  # Updated related_name
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    remarks = models.TextField(blank=True, null=True)
 
