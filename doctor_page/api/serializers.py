@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Doctor, Patient, Appointment, Medicine, Prescription, GlobalMedicine
+from .models import Doctor, Patient, Appointment, Medicine, Prescription, GlobalMedicine, PrescriptionItem
 
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,11 +22,11 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = '__all__'
         
+
 class GlobalMedicineSerializer(serializers.ModelSerializer):
     class Meta:
         model = GlobalMedicine
         fields = ['id', 'name', 'category', 'company', 'unique_code', 'code_confirmed']
-
 
 class MedicineSerializer(serializers.ModelSerializer):
     global_medicine = GlobalMedicineSerializer()
@@ -36,9 +36,15 @@ class MedicineSerializer(serializers.ModelSerializer):
         fields = ['id', 'global_medicine', 'doctor']
 
 
+
+class PrescriptionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PrescriptionItem
+        fields = ['medicine', 'quantity', 'remarks']
+
 class PrescriptionSerializer(serializers.ModelSerializer):
-    medicines = MedicineSerializer(many=True, read_only=True)
+    items = PrescriptionItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Prescription
-        fields = ['id', 'appointment', 'medicines', 'notes']
+        fields = ['id', 'appointment', 'items', 'qr_code', 'notes']

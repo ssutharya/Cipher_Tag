@@ -1,18 +1,22 @@
-from rest_framework import status
+from rest_framework import status,viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
-from .models import Doctor, Patient, Appointment, Medicine, Prescription, GlobalMedicine
+from .models import Doctor, Patient, Appointment, Medicine, Prescription, GlobalMedicine, PrescriptionItem
 from .serializers import DoctorSerializer, PatientSerializer, AppointmentSerializer, MedicineSerializer, PrescriptionSerializer, GlobalMedicineSerializer
 from django.contrib.auth.models import User
 from .permissions import IsPatientOrAdmin, IsDoctorOrAdmin
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from django.core.files.base import ContentFile
 import logging
+from io import BytesIO
 from datetime import datetime 
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsDoctorOrAdmin
+from rest_framework.decorators import action
+import qrcode
 
 
 logger = logging.getLogger(__name__)
@@ -289,3 +293,128 @@ def doctor_appointments(request):
     appointments = Appointment.objects.filter(doctor=doctor).order_by('appointment_date')
     serializer = AppointmentSerializer(appointments, many=True)
     return Response(serializer.data)
+
+
+
+class GlobalMedicineViewSet(viewsets.ModelViewSet):
+    queryset = GlobalMedicine.objects.all()
+    serializer_class = GlobalMedicineSerializer
+
+    @action(detail=False, methods=['post'], url_path='add_to_inventory', permission_classes=[AllowAny])
+    def add_to_inventory(self, request):
+        """
+        Add a new medicine to the global inventory with a unique code and allow confirmation for a doctor.
+        """
+        # Extract data from the request
+        doctor_id = request.data.get('doctor_id')
+        name = request.data.get('name')
+        category = request.data.get('category')
+        company = request.data.get('company')
+
+        # Validate required fields
+        if not all([doctor_id, name, category, company]):
+            return Response(
+                {"error": "All fields (doctor_id, name, category, company) are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate doctor existence
+        try:
+            doctor = Doctor.objects.get(pk=doctor_id)
+        except Doctor.DoesNotExist:
+            return Response(
+                {"error": "Invalid doctor ID."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Generate a unique code and create the GlobalMedicine instance
+        global_medicine = GlobalMedicine(name=name, category=category, company=company)
+        unique_code = global_medicine.generate_unique_code()
+
+        # Check if a GlobalMedicine with the generated unique code already exists
+        if GlobalMedicine.objects.filter(unique_code=unique_code).exists():
+            return Response(
+                {"error": "Medicine with this unique code already exists."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Save the GlobalMedicine instance
+        global_medicine.unique_code = unique_code
+        global_medicine.save()
+
+        # Add the medicine to the doctor's inventory
+        medicine = Medicine.objects.create(global_medicine=global_medicine, doctor=doctor)
+
+        # Serialize and return the response
+        global_medicine_serializer = GlobalMedicineSerializer(global_medicine)
+        medicine_serializer = MedicineSerializer(medicine)
+
+        return Response(
+            {
+                "message": "Medicine added to global inventory and doctor's inventory.",
+                "global_medicine": global_medicine_serializer.data,
+                "medicine": medicine_serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+    
+
+
+class PrescriptionViewSet(viewsets.ModelViewSet):
+    queryset = Prescription.objects.all()
+    serializer_class = PrescriptionSerializer
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def prescribe(self, request):
+        doctor_id = request.data.get('doctor_id')
+        patient_id = request.data.get('patient_id')
+        appointment_id = request.data.get('appointment_id')
+        items = request.data.get('items', [])
+
+        # Validate doctor, patient, and appointment
+        try:
+            doctor = Doctor.objects.get(pk=doctor_id)
+            patient = Patient.objects.get(pk=patient_id)
+            appointment = Appointment.objects.get(pk=appointment_id)
+        except (Doctor.DoesNotExist, Patient.DoesNotExist, Appointment.DoesNotExist):
+            return Response({"error": "Invalid doctor, patient, or appointment ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the prescription
+        prescription = Prescription.objects.create(appointment=appointment)
+
+        # Add prescription items
+        medicine_details = []
+        for item in items:
+            medicine_id = item.get('medicine_id')
+            quantity = item.get('quantity', 1)
+            remarks = item.get('remarks', '')
+
+            try:
+                medicine = Medicine.objects.get(pk=medicine_id)
+                PrescriptionItem.objects.create(
+                    prescription=prescription,
+                    medicine=medicine,
+                    quantity=quantity,
+                    remarks=remarks
+                )
+                # Collect medicine details for QR code
+                medicine_details.append(f"{medicine.global_medicine.name} (Qty: {quantity}, Remarks: {remarks})")
+            except Medicine.DoesNotExist:
+                return Response({"error": f"Invalid medicine ID: {medicine_id}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate QR code including medicine details
+        qr_data = f"Doctor: {doctor.name}, Patient: {patient.name}, Prescription ID: {prescription.id}, Medicines: {', '.join(medicine_details)}"
+        qr = qrcode.QRCode()
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        img = qr.make_image(fill='black', back_color='white')
+
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+        qr_image = ContentFile(buffer.read(), name=f'prescription_{prescription.id}.png')
+        prescription.qr_code.save(f'prescription_{prescription.id}.png', qr_image)
+
+        # Serialize the response
+        serializer = PrescriptionSerializer(prescription)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
