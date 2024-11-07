@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-i0ha45ztpr@%7y@$so9wwiy(6dsrfcb6nd=&@4cd^v)l!md(n2"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['34.47.208.77']
+ALLOWED_HOSTS = ['34.47.208.77', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
         # Third-party apps
     'rest_framework',  # Django REST Framework
     'corsheaders',
+    'django_extensions',
 
     # Your app
     'api',
@@ -116,7 +117,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000, http://34.47.208.77/",  # React frontend URL
+    "http://localhost:3000",  # Correct entry without a trailing slash
+    "http://34.47.208.77"     # Correct entry without a trailing slash or path
 ]
 
 # Internationalization

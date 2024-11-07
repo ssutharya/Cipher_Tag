@@ -1,5 +1,11 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from rest_framework.routers import DefaultRouter
+from .views import GlobalMedicineViewSet, PrescriptionViewSet  # Import PrescriptionViewSet
+
+router = DefaultRouter()
+router.register(r'global-medicines', GlobalMedicineViewSet, basename='global-medicines')
+router.register(r'prescriptions', PrescriptionViewSet, basename='prescription')  # Register the PrescriptionViewSet
 
 urlpatterns = [
     path('doctors/', views.list_available_doctors, name='list-available-doctors'),
@@ -12,13 +18,10 @@ urlpatterns = [
     path('admin/appointments/', views.doctor_appointments, name='list-appointments'),
     path('doctor/patients/', views.list_patients, name='list-doctor-patients'),
     path('admin/create-doctor/', views.create_doctor, name='create-doctor'),
-
-
-
+    path('api/', include(router.urls)),  # Include registered routers for API paths
 
     path('admin/generate-medicine-code/', views.generate_medicine_code, name='generate-medicine-code'),
     path('admin/confirm-medicine-code/', views.confirm_medicine_code, name='confirm-medicine-code'),
 
-    path('doctor/profile/', views.doctor_profile,name='doctor-profile'),
-
+    path('doctor/profile/', views.doctor_profile, name='doctor-profile'),
 ]
